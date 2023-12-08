@@ -29,6 +29,7 @@ resource "aws_launch_configuration" "example" {
 
 }
 resource "aws_autoscaling_group" "example" {
+  count                = var.enable_autoscaling ? 1 : 0
   launch_configuration = aws_launch_configuration.example.name
   vpc_zone_identifier  = data.aws_subnets.default.ids
 
@@ -42,6 +43,34 @@ resource "aws_autoscaling_group" "example" {
     value               = "${var.cluster_name}-asg"
     propagate_at_launch = true
   }
+
+  dynamic "tag" {
+    for_each = var.custom_tags
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = true
+    }
+  }
+
+}
+resource "aws_autoscaling_schedule" "scale_out_during_business_hours" {
+  count                  = var.enable_autoscaling ? 1 : 0
+  autoscaling_group_name = module.webserver_cluster.asg_name
+  scheduled_action_name  = "${var.cluster_name}-scale-out-during-business-hours"
+  min_size               = 1
+  max_size               = 2
+  desired_capacity       = 2
+  recurrence             = "0 9 * * *"
+}
+resource "aws_autoscaling_schedule" "scale_in_at_night" {
+  count                  = var.enable_autoscaling ? 1 : 0
+  autoscaling_group_name = aws_autoscaling_group.example.name
+  scheduled_action_name  = "${var.cluster_name}-scale-in-at-night"
+  min_size               = 1
+  max_size               = 2
+  desired_capacity       = 1
+  recurrence             = "0 17 * * *"
 }
 
 resource "aws_security_group" "instance" {
