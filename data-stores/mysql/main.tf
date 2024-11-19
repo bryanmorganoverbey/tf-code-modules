@@ -18,7 +18,7 @@ resource "aws_db_instance" "example" {
   engine   = var.replicate_source_db == null ? "mysql" : null
   db_name  = var.replicate_source_db == null ? var.db_name : null
   username = var.replicate_source_db == null ? var.db_username : null
-  password = var.replicate_source_db == null ? var.db_password : nulld\
+  password = var.replicate_source_db == null ? var.db_password : null
 }
 
 terraform {

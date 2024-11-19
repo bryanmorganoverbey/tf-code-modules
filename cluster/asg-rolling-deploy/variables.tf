@@ -9,10 +9,26 @@ variable "instance_type" {
 variable "min_size" {
   description = "The minimum number of EC2 Instances in the ASG"
   type        = number
+  validation {
+    condition     = var.min_size > 0
+    error_message = "ASGs can't be empty or we'll have an outage!"
+  }
+  validation {
+    condition     = var.min_size <= 10
+    error_message = "ASGs must have 10 or fewer instances to keep costs down."
+  }
 }
 variable "max_size" {
   description = "The maximum number of EC2 Instances in the ASG"
   type        = number
+  validation {
+    condition     = var.max_size > 0
+    error_message = "ASGs can't be empty or we'll have an outage!"
+  }
+  validation {
+    condition     = var.max_size <= 10
+    error_message = "ASGs must have 10 or fewer instances to keep costs down."
+  }
 }
 variable "custom_tags" {
   description = "Custom tags to set on the Instances in the ASG"
@@ -45,7 +61,7 @@ variable "health_check_type" {
 variable "user_data" {
   description = "The User Data script to run in each Instance at boot"
   type        = string
-  default = null
+  default     = null
 }
 variable "ami" {
   description = "The AMI to run in the cluster"
